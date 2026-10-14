@@ -1,0 +1,38 @@
+[
+  {
+    "width": 853,
+    "height": 479,
+    "field": "both",
+    "frames": 3,
+    "byte_identical": true
+  },
+  {
+    "width": 853,
+    "height": 479,
+    "field": "interleaved",
+    "frames": 3,
+    "byte_identical": true
+  },
+  {
+    "width": 853,
+    "height": 479,
+    "field": "alternating",
+    "frames": 3,
+    "byte_identical": true
+  },
+  {
+    "width": 853,
+    "height": 479,
+    "field": "alternating",
+    "frames": 4,
+    "byte_identical": true
+  },
+  {
+    "width": 3840,
+    "height": 2160,
+    "field": "interleaved",
+    "frames": 20,
+    "byte_identical": true,
+    "sha256": "e703077bcd111fb5eeeeec65f71f6f02936dff70894cbabd5b8324432c0acc6b"
+  }
+]
