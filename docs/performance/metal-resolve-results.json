@@ -30,8 +30,8 @@
     "timing": "Resolve TimeTakenToRenderInMs",
     "control": "Official installed v0.9.6 binary",
     "automation": "Official Resolve scripting API",
-    "computer_use": "Blocked by locked Mac; not completed",
-    "limitations": "Short synthetic export, not interactive playback or long-form stability."
+    "computer_use": "Completed: inspected Fusion controls, changed noise and chroma phase, visually verified the changed Edit viewer image, played the short clip to its end, restored defaults, and confirmed Fusion output.",
+    "limitations": "Short synthetic exports and a basic UI playback check, not a playback FPS benchmark or long-form stability test."
   },
   "summary": {
     "original_median_ms": 10223,
@@ -127,5 +127,14 @@
         "TimeTakenToRenderInMs": 1773
       }
     }
-  ]
+  ],
+  "ui_followup": {
+    "date": "2026-10-13",
+    "settings_restored": true,
+    "fusion_output_visually_confirmed": true,
+    "edit_playback_reached_end": true,
+    "playback_fps_measured": false,
+    "viewer_observation": "A blank right Fusion viewer affected both the original and Metal effects during inspection. Saving and reopening the test project restored the viewer.",
+    "additional_video_files_created": 0
+  }
 }

@@ -26,7 +26,7 @@ Both effects were applied as Fusion OFX nodes to the same 3840 x 2160, 30 fps sy
 
 The median corresponds to 5.77 versus 33.28 exported frames per second. These are short, synthetic, default-preset exports. They do not establish interactive playback speed, long-form stability, or performance with every preset and effect stack.
 
-Resolve loaded the separate plugin and logged a successful GPU command completion on the M4 Max. All eight render jobs, including the two PNG comparisons, completed. The MP4 files decoded successfully. Exported comparison frames were visually inspected. Computer-use inspection of Resolve's UI remains uncompleted because the Mac was locked.
+Resolve loaded the separate plugin and logged a successful GPU command completion on the M4 Max. All eight render jobs, including the two PNG comparisons, completed. The MP4 files decoded successfully. Exported comparison frames were visually inspected. A follow-up computer-use check inspected the Metal node and its controls in Fusion, changed composite noise and chroma phase error, observed the changed image in the Edit viewer, and played the short clip to its end. The settings were then restored to the original defaults. Metal output was also visually confirmed in Fusion. A blank right viewer affected both the original and Metal effects during inspection; saving and reopening the test project restored it. Playback frame rate was not measured.
 
 Machine-readable host timings, job IDs, binary hashes, and comparison results: [metal-resolve-results.json](metal-resolve-results.json).
 
@@ -72,6 +72,6 @@ The example generates frames in memory and writes only measurements to stdout. T
 
 Dense snow still requires CPU metadata generation and can reduce or eliminate Metal's advantage over the threaded CPU renderer. Extreme filter scales can also spend more time in the serial GPU recurrence. These cases need separate measurements before making performance claims.
 
-The Metal path currently accepts positive-strided RGB or RGBA images, 8-bit, 16-bit, or float components, and matching full-frame input/output dimensions up to 16,384 pixels per axis. Resolve's ordinary UHD path was tested. Other hosts, Intel Macs, older Apple Silicon devices, interactive playback, and long timelines have not been validated.
+The Metal path currently accepts positive-strided RGB or RGBA images, 8-bit, 16-bit, or float components, and matching full-frame input/output dimensions up to 16,384 pixels per axis. Resolve's ordinary UHD path was tested. Other hosts, Intel Macs, older Apple Silicon devices, sustained interactive playback performance, and long timelines have not been validated.
 
 The original [CPU threading report](resolve-4k.md) and [Metal kernel experiments](../../experiments/metal/README.md) document earlier stages of the work. Their statements about unimplemented Metal support and untested Resolve rendering describe those earlier stages.
