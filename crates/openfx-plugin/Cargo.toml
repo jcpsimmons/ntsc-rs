@@ -19,5 +19,5 @@ crate-type = ["cdylib"]
 workspace = true
 
 [features]
-default = []
+default = ["metal"]
 metal = ["ntsc-rs/metal"]
