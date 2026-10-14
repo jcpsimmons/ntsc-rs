@@ -1,0 +1,2 @@
+case,width,height,max_abs,rms,cpu_ms,metal_wall_ms,gpu_ms
+default,3840,2160,0.000002980,0.000000195,13.248,11.386,NA
