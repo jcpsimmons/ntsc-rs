@@ -1,0 +1,6 @@
+device,layout,gpu_ms,wall_ms,max_absolute_error,rms_error,bit_differences
+Apple M4 Max,row-major,4.193,4.373,0,0,0
+Apple M4 Max,transposed,10.643,10.852,0,0,0
+Apple M4 Max,block-scan-128,2.214,2.384,5.36441803e-06,1.07131407e-06,7529848
+Apple M4 Max,simd-scan-128,1.913,2.068,5.36441803e-06,1.07131407e-06,7529848
+Apple M4 Max,noise-four-passes,1.957,2.109,0,0,0

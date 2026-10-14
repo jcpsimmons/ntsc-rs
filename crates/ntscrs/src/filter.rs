@@ -2,6 +2,9 @@ use core::num::NonZero;
 
 use fearless_simd::{Level, dispatch, f32x4, prelude::*};
 
+#[cfg(all(target_arch = "aarch64", feature = "neon-filter"))]
+mod neon;
+
 /// Multiplies two polynomials (lowest coefficients first).
 /// Note that this function does not trim trailing zero coefficients--see below for that.
 /// This is how filters are multiplied--a transfer function is a fraction of polynomials.
@@ -362,6 +365,12 @@ impl TransferFunction {
         initial: [f32; ROWS],
         delay: usize,
     ) {
+        #[cfg(all(target_arch = "aarch64", feature = "neon-filter"))]
+        if ROWS >= 4 && ROWS.is_multiple_of(4) && self.should_use_simd(level) {
+            // AArch64 has NEON as part of its baseline ISA.
+            unsafe { self.filter_rows_neon(signal, initial, delay) };
+            return;
+        }
         if self.should_use_simd(level) && filter_signal_simd(level, self, signal, initial, delay) {
             return;
         }
@@ -517,5 +526,144 @@ mod tests {
         check::<2>(&tf, 3, 8);
         check::<4>(&tf, 1, 4);
         check::<2>(&tf, 1, 10);
+    }
+
+    #[cfg(all(target_arch = "aarch64", feature = "neon-filter"))]
+    #[test]
+    fn row_neon_matches_coefficient_neon_bits() {
+        fn check_rows<const ROWS: usize>() {
+            let filters = [
+                TransferFunction::new(&[0.6, 0.3], &[-0.4]),
+                TransferFunction::new(&[0.2, 0.5, 0.3], &[-0.3, 0.1]),
+                TransferFunction::new(&[0.015625], &[-2.25, 1.6875, -0.421875]),
+            ];
+            for filter in filters {
+                for width in [0, 1, 3, 4, 5, 7, 8, 31, 32, 33, 127, 128, 3839, 3840] {
+                    for delay in [0, 1, 3, 4, 7, 129] {
+                        let mut old: [Vec<f32>; ROWS] = core::array::from_fn(|r| {
+                            (0..width)
+                                .map(|i| ((i * 31 + r * 7) % 61) as f32 * 0.125 - 3.0)
+                                .collect()
+                        });
+                        let mut new = old.clone();
+                        let initial = core::array::from_fn(|r| r as f32 * 0.125);
+                        let mut refs = old.each_mut().map(Vec::as_mut_slice);
+                        assert!(super::filter_signal_simd(
+                            Level::new(),
+                            &filter,
+                            &mut refs,
+                            initial,
+                            delay
+                        ));
+                        let mut refs = new.each_mut().map(Vec::as_mut_slice);
+                        unsafe { filter.filter_rows_neon(&mut refs, initial, delay) };
+                        for row in 0..ROWS {
+                            for x in 0..width {
+                                assert_eq!(
+                                    old[row][x].to_bits(),
+                                    new[row][x].to_bits(),
+                                    "ROWS={ROWS} width={width} delay={delay} row={row} x={x}"
+                                );
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        check_rows::<4>();
+        check_rows::<8>();
+        check_rows::<16>();
+    }
+
+    /// Generate an exact reference and time the existing parallel CPU filter for the Metal probe.
+    #[cfg(all(feature = "std", feature = "rayon"))]
+    #[test]
+    #[ignore = "writes a GPU benchmark fixture; set NTSC_GPU_PROBE_DIR"]
+    fn metal_filter_fixture() {
+        use crate::{Context, thread_pool::ZipChunks};
+        use std::{hint::black_box, io::Write, time::Instant};
+        let dir = std::path::PathBuf::from(std::env::var("NTSC_GPU_PROBE_DIR").unwrap());
+        std::fs::create_dir_all(&dir).unwrap();
+        let (width, height, passes) = (3840, 2160, 10);
+        let input: Vec<f32> = (0..width * height)
+            .map(|i| ((i * 17 + i / width * 31) % 256) as f32 / 255.0)
+            .collect();
+        // Three cascaded one-pole lowpass filters, alpha = 0.25. Exactly representable coefficients.
+        let filter = TransferFunction::new(&[0.015625], &[-2.25, 1.6875, -0.421875]);
+        let ctx = Context::new();
+        let mut output = input.clone();
+        let mut times = Vec::new();
+        for iteration in 0..33 {
+            output.copy_from_slice(&input);
+            let start = Instant::now();
+            ctx.thread_pool.install(|| {
+                for _ in 0..passes {
+                    ZipChunks::new([output.as_mut_slice()], width * 8).par_for_each(|_, [rows]| {
+                        let mut chunks = rows.chunks_exact_mut(width);
+                        let mut refs: [&mut [f32]; 8] =
+                            core::array::from_fn(|_| chunks.next().unwrap());
+                        filter.filter_signal_in_place(ctx.level, &mut refs, [0.0; 8], 0);
+                    });
+                }
+            });
+            if iteration >= 3 {
+                times.push(start.elapsed().as_secs_f64() * 1000.0);
+            }
+            black_box(&output);
+        }
+        times.sort_by(f64::total_cmp);
+        for (name, values) in [("input.f32", &input), ("reference.f32", &output)] {
+            let mut file = std::io::BufWriter::new(std::fs::File::create(dir.join(name)).unwrap());
+            for value in values {
+                file.write_all(&value.to_le_bytes()).unwrap();
+            }
+            file.flush().unwrap();
+        }
+        std::println!(
+            "CPU 4K single-plane ten-filter chain: {:.3} ms",
+            (times[14] + times[15]) * 0.5
+        );
+        times.clear();
+        for iteration in 0..33 {
+            output.copy_from_slice(&input);
+            let start = Instant::now();
+            ctx.thread_pool.install(|| {
+                for pass in 0..4 {
+                    ZipChunks::new([output.as_mut_slice()], width).par_for_each(|row, [line]| {
+                        let noise = crate::noise::Fbm {
+                            seed: row as i32 * 17 + 1234 + pass * 101,
+                            octaves: 2,
+                            gain: 1.0,
+                            lacunarity: 2.0,
+                            frequency: 0.05,
+                        };
+                        crate::noise::add_noise_1d::<crate::noise::Simplex1d, _>(
+                            ctx.level,
+                            &noise,
+                            0.1,
+                            [row as f32 * 0.125],
+                            [width],
+                            line,
+                        );
+                    });
+                }
+            });
+            if iteration >= 3 {
+                times.push(start.elapsed().as_secs_f64() * 1000.0);
+            }
+            black_box(&output);
+        }
+        times.sort_by(f64::total_cmp);
+        let mut file = std::io::BufWriter::new(
+            std::fs::File::create(dir.join("noise-reference.f32")).unwrap(),
+        );
+        for value in &output {
+            file.write_all(&value.to_le_bytes()).unwrap();
+        }
+        file.flush().unwrap();
+        std::println!(
+            "CPU 4K single-plane four-noise-pass chain: {:.3} ms",
+            (times[14] + times[15]) * 0.5
+        );
     }
 }
