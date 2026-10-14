@@ -1,0 +1,131 @@
+{
+  "date": "2026-10-13",
+  "upstream_base": "v0.9.6",
+  "upstream_commit": "0bc9bb8a58d8c69ed7d83fe78ad892a6c7e0e6ec",
+  "hardware": {
+    "chip": "Apple M4 Max",
+    "cpu_cores": 16,
+    "memory_gib": 64,
+    "os": "macOS 26.5.2",
+    "host": "DaVinci Resolve Studio 21.1"
+  },
+  "method": {
+    "width": 3840,
+    "height": 2160,
+    "frames": 59,
+    "fps": 30,
+    "source": "2-second synthetic testsrc2 H.264",
+    "output": "H.264 MP4, 20 Mbps, no audio",
+    "effect_location": "Fusion OFX node",
+    "settings": "v0.9.6 defaults; seed 0, 1, 2 for paired runs",
+    "order": [
+      "metal seed 0",
+      "original seed 0",
+      "metal seed 1",
+      "original seed 1",
+      "original seed 2",
+      "metal seed 2"
+    ],
+    "disk_render_cache": "none",
+    "timing": "Resolve TimeTakenToRenderInMs",
+    "control": "Official installed v0.9.6 binary",
+    "automation": "Official Resolve scripting API",
+    "computer_use": "Blocked by locked Mac; not completed",
+    "limitations": "Short synthetic export, not interactive playback or long-form stability."
+  },
+  "summary": {
+    "original_median_ms": 10223,
+    "metal_median_ms": 1773,
+    "speedup": 5.765933446136492,
+    "original_effective_fps": 5.771300009781864,
+    "metal_effective_fps": 33.27693175408911
+  },
+  "binaries": {
+    "original_sha256": "38fdad605b9f7ff30aee99bf3c9d053f94a8182748628e0748b7a1fc1de75883",
+    "metal_sha256": "6b2058342ad5ee9e13e658393bfae31cf5ff5f35a516c80f3765557eb215ab8c",
+    "metal_build": "aarch64-apple-darwin, target-cpu=native on M4 Max, thin LTO, one codegen unit",
+    "gpu_execution_confirmation": "NTSC-rs Metal: GPU render completed on Apple M4 Max"
+  },
+  "png_comparison": {
+    "format": "16-bit RGB PNG, same timeline frame 108029, seed 0",
+    "samples": 24883200,
+    "max_error_16bit": 1,
+    "mean_absolute_error_16bit": 0.0005689782664609054,
+    "different_samples": 14158,
+    "psnr_db": 128.778509
+  },
+  "jobs": [
+    {
+      "file": "metal-4k-2s.mp4",
+      "job_id": "971c593a-6745-48da-959b-eae82ba192fe",
+      "status": {
+        "JobStatus": "Complete",
+        "CompletionPercentage": 100,
+        "TimeTakenToRenderInMs": 1787
+      }
+    },
+    {
+      "file": "original-4k-2s.mp4",
+      "job_id": "9f1dcd7f-8889-4735-af38-cb5f7d233350",
+      "status": {
+        "JobStatus": "Complete",
+        "CompletionPercentage": 100,
+        "TimeTakenToRenderInMs": 10206
+      }
+    },
+    {
+      "file": "original00108029.png",
+      "job_id": "965093e5-2c6e-4d67-af14-58e1a87efe3c",
+      "status": {
+        "JobStatus": "Complete",
+        "CompletionPercentage": 100,
+        "TimeTakenToRenderInMs": 1179
+      }
+    },
+    {
+      "file": "metal00108029.png",
+      "job_id": "2b7377e9-325e-4220-a8b6-e5a64542216e",
+      "status": {
+        "JobStatus": "Complete",
+        "CompletionPercentage": 100,
+        "TimeTakenToRenderInMs": 1176
+      }
+    },
+    {
+      "file": "metal-repeat-1.mp4",
+      "job_id": "83d08d89-62ea-4ce2-9f70-804cd2cf09c2",
+      "status": {
+        "JobStatus": "Complete",
+        "CompletionPercentage": 100,
+        "TimeTakenToRenderInMs": 1727
+      }
+    },
+    {
+      "file": "original-repeat-1.mp4",
+      "job_id": "110a4a3f-af52-4f37-bc23-ff3250915688",
+      "status": {
+        "JobStatus": "Complete",
+        "CompletionPercentage": 100,
+        "TimeTakenToRenderInMs": 10379
+      }
+    },
+    {
+      "file": "original-repeat-2.mp4",
+      "job_id": "470f0fa8-0eb6-4455-a6d4-1adc09f4c5d4",
+      "status": {
+        "JobStatus": "Complete",
+        "CompletionPercentage": 100,
+        "TimeTakenToRenderInMs": 10223
+      }
+    },
+    {
+      "file": "metal-repeat-2.mp4",
+      "job_id": "0032a063-c4f7-4657-8d99-3519da219620",
+      "status": {
+        "JobStatus": "Complete",
+        "CompletionPercentage": 100,
+        "TimeTakenToRenderInMs": 1773
+      }
+    }
+  ]
+}

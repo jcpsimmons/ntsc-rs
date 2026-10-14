@@ -1,5 +1,7 @@
 # OpenFX 4K performance
 
+This report records the initial CPU threading change. The later [Metal implementation and Resolve results](metal-resolve.md) cover the current branch.
+
 The OpenFX plugin in v0.9.6 builds without the core library's `rayon` feature. That disables CPU multithreading throughout the effect, even though the code calls methods named `par_for_each`. Enabling that feature in the plugin dependency produced a 6.9x speedup for the 4K benchmark on an Apple M4 Max.
 
 The change is one line in `crates/openfx-plugin/Cargo.toml`. It keeps the core library's default features intact for other consumers.

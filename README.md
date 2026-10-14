@@ -1,3 +1,5 @@
+> Apple Silicon performance fork: [NTSC-rs Metal for Resolve](docs/performance/metal-resolve.md) adds a separate Metal OpenFX effect. Three short UHD exports on an M4 Max measured a 5.77x median speedup over the official v0.9.6 plugin. See the report for build instructions, output checks, and test limits.
+
 <p align="center">
     <a href="https://ntsc.rs">
         <picture>

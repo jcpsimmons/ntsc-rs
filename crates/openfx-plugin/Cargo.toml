@@ -6,8 +6,12 @@ license = "MIT OR ISC OR Apache-2.0"
 repository = "https://github.com/valadaptive/ntsc-rs/tree/main/crates/openfx-plugin"
 
 [dependencies]
-ntsc-rs = { path = "../ntscrs", features = ["rayon"] }
+ntsc-rs = { path = "../ntscrs", features = ["rayon", "neon-filter"] }
 rfd = "0.17"
+
+[features]
+default = ["metal"]
+metal = ["ntsc-rs/metal"]
 
 [build-dependencies]
 bindgen = "0.72"
